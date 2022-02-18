@@ -1,0 +1,4 @@
+services:
+ timezone.get_current_time_by_timezone:
+   class: Drupal\timezone\CurrentTimeByTimezone
+   arguments: ['@date.formatter']

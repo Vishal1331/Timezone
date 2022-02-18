@@ -1,0 +1,49 @@
+<?php
+
+/**
+* Implements hook_install().
+*/
+function timezone_install(){
+    $vid = "timezone";
+    $name = "Timezone";
+    $vocabularies = \Drupal\taxonomy\Entity\Vocabulary::loadMultiple();
+        if (!isset($vocabularies[$vid])) {
+
+            // Create vocabulary on module install. 
+            $vocabulary = \Drupal\taxonomy\Entity\Vocabulary::create(array(
+            'vid' => $vid,
+            'machine_name' => $vid,
+            'description' => 'Vocabulary created for timezone',
+            'name' => $name,
+            ));
+            $vocabulary->save();
+        }
+    $options = ['America/Chicago' => 'America/Chicago', 'America/New_York' => 'America/New_York', 'Asia/Tokyo' => 'Asia/Tokyo', 'Asia/Dubai' => 'Asia/Dubai', 'Asia/Kolkata' => 'Asia/Kolkata', 'Europe/Amsterdam' => 'Europe/Amsterdam', 'Europe/Oslo' => 'Europe/Oslo', 'Europe/London' => 'Europe/London'];
+    foreach($options as $key => $value){
+        $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties(['name' => $value, 'vid' => $vid]);
+        
+        // Create terms in timezone vocabulary on module install. 
+        if(empty($term)){
+            $new_term = \Drupal\taxonomy\Entity\Term::create([
+                'name' => $value,
+                'vid' => $vid,
+            ]);
+
+            // Save the taxonomy term.
+            $new_term->save();
+        }
+    }
+}
+
+/**
+* Implements hook_uninstall().
+*/
+function timezone_uninstall(){
+
+// Delete timezone vocabulary on module uninstall. 
+$vid = "timezone";
+\Drupal\taxonomy\Entity\Vocabulary::load($vid)->delete();
+
+// Delete config values on module uninstall. 
+Drupal::configFactory()->getEditable('config.timezone_config_form')->delete();
+}
